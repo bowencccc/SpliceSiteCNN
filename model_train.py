@@ -11,7 +11,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 import random
-
+from collections import defaultdict
 
 def generate_positive_introns(reliable_bed):
     # Read the reliable BED file
@@ -55,6 +55,62 @@ def extract_sequences_from_introns(introns, genome_fasta,flank_short = 3, flank_
                 continue
             sequences.append(donor_seq + acceptor_seq)
     return sequences
+
+
+def parse_gtf(gtf_file):
+    transcripts = defaultdict(list)
+
+    with open(gtf_file, 'r') as f:
+        for line in f:
+            fields = line.strip().split('\t')
+            if fields[2] == 'exon':  # Only process exon entries
+                chrom = fields[0]
+                start = int(fields[3])
+                end = int(fields[4])
+                strand = fields[6]
+
+                # Extract transcript_id
+                attributes = {kv.split(' ')[0]: kv.split(' ')[1].strip('";') for kv in fields[8].split('; ') if kv}
+                transcript_id = attributes.get('transcript_id', None)
+
+                if transcript_id:
+                    transcripts[transcript_id].append((chrom, start, end, strand))
+
+    return transcripts
+
+
+def extract_introns(transcripts):
+    introns = []
+
+    for transcript_id, exons in transcripts.items():
+        exons.sort(key=lambda x: x[1])  # Sort exons by start position
+
+        for i in range(len(exons) - 1):
+            chrom, exon_end, next_exon_start, strand = exons[i][0], exons[i][2], exons[i + 1][1], exons[i][3]
+            introns.append({'Chromosome': chrom, 'Start': exon_end, 'End': next_exon_start - 1,'Junction_ID': 1,'Score': 1, 'Strand': strand})
+
+    return pd.DataFrame(introns)
+
+
+def filter_negatives_by_introns(difficult_negatives, introns_stringtie):
+    # Merge on relevant columns to identify overlap
+    merged = difficult_negatives.merge(
+        introns_stringtie,
+        on=['Chromosome', 'Start', 'End', 'Strand'],
+        how='left',
+        indicator=True
+    )
+
+    # Keep only rows that did not find a match in introns_stringtie
+    filtered = merged[merged['_merge'] == 'left_only'].drop(columns=['_merge'])
+    
+    # Drop any duplicated columns from introns_stringtie (with suffix '_y')
+    filtered = filtered.loc[:, ~filtered.columns.str.endswith('_y')]
+
+    # Rename columns to remove suffixes
+    filtered.columns = [col.replace('_x', '') for col in filtered.columns]
+    
+    return filtered
 
 
 def reverse_complement(seq):
@@ -315,6 +371,8 @@ def main():
                         help="Path to out junctions BED file")
     parser.add_argument("--reference_genome", type=str, required=True,
                         help="Path to reference genome FASTA file")
+    parser.add_argument("--stringtie_gtf", type=str, required=True,
+                        help="Path to stringtie gtf file")
     parser.add_argument("--output_file", type=str, required=True,
                         help="Output file name (species-specific)")
 
@@ -323,6 +381,7 @@ def main():
     reliable_bed = args.reliable_junctions
     tiecov_bed = args.out_junctions
     fasta_file = args.reference_genome
+    stringtie_gtf = args.stringtie_gtf
     output_file = args.output_file
     
     # Example: Print the arguments to confirm
@@ -339,6 +398,10 @@ def main():
     positive_introns = generate_positive_introns(reliable_bed)
     eazy_negatives_introns = generate_eazy_negatives_introns(positive_introns, fasta_file)
     difficult_negatives_introns = generate_more_difficult_negatives_introns(tiecov_bed)
+    
+    stringtie_introns = extract_introns(parse_gtf(stringtie_gtf))
+    # Filter difficult negatives by stringtie introns
+    difficult_negatives_introns = filter_negatives_by_introns(difficult_negatives_introns, stringtie_introns)
 
     # Extract sequences from the introns
     positives = extract_sequences_from_introns(positive_introns, fasta_file, flank_short, flank_long)
