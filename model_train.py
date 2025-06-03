@@ -384,11 +384,11 @@ def main():
     stringtie_gtf = args.stringtie_gtf
     output_file = args.output_file
     
-    # Example: Print the arguments to confirm
-    print("Reliable junctions file:", args.reliable_junctions)
-    print("Out junctions file:", args.out_junctions)
-    print("Reference genome file:", args.reference_genome)
-    print("Output file name:", args.output_file)
+    # # Example: Print the arguments to confirm
+    # print("Reliable junctions file:", args.reliable_junctions)
+    # print("Out junctions file:", args.out_junctions)
+    # print("Reference genome file:", args.reference_genome)
+    # print("Output file name:", args.output_file)
 
     flank_short = 3  # Short flank length
     flank_long = 35  # Long flank length
