@@ -17,10 +17,11 @@ cd SpliceSiteCNN
 
 ### 2. Install Dependencies
 
+```bash
 conda create -n splice_pred python=3.10 -y  
 conda activate splice_pred  
 pip install -r requirements.txt  
-
+```
 
 ## How to Run
 
