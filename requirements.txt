@@ -1,0 +1,5 @@
+pandas
+biopython
+numpy
+torch
+matplotlib
