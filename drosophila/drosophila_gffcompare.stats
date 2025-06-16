@@ -1,0 +1,30 @@
+# gffcompare v0.12.6 | Command line was:
+#gffcompare -r ./Dmel//cleaned_Dmel.gff -o Dmel_gffcompare ./Dmel/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.gtf
+#
+
+#= Summary for dataset: ./Dmel/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.gtf 
+#     Query mRNAs :   48350 in   13788 loci  (45527 multi-exon transcripts)
+#            (7827 multi-transcript loci, ~3.5 transcripts per locus)
+# Reference mRNAs :   32264 in   17114 loci  (26211 multi-exon)
+# Super-loci w/ reference transcripts:    11291
+#-----------------| Sensitivity | Precision  |
+        Base level:    80.0     |    81.2    |
+        Exon level:    69.6     |    59.2    |
+      Intron level:    84.6     |    79.2    |
+Intron chain level:    57.9     |    33.3    |
+  Transcript level:    49.8     |    33.2    |
+       Locus level:    63.0     |    74.0    |
+
+     Matching intron chains:   15169
+       Matching transcripts:   16064
+              Matching loci:   10785
+
+          Missed exons:   10641/82038	( 13.0%)
+           Novel exons:    9105/115393	(  7.9%)
+        Missed introns:    4240/60488	(  7.0%)
+         Novel introns:    5335/64583	(  8.3%)
+           Missed loci:    4683/17114	( 27.4%)
+            Novel loci:    1952/13788	( 14.2%)
+
+ Total union super-loci across all input datasets: 13243 
+48350 out of 48350 consensus transcripts written in Dmel_gffcompare.annotated.gtf (0 discarded as redundant)
