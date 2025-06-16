@@ -1,2 +1,0 @@
-drosophila/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna filter=lfs diff=lfs merge=lfs -text
-drosophila/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.gff filter=lfs diff=lfs merge=lfs -text
